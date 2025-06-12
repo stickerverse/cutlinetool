@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                            QGraphicsScene, QGraphicsView, QGraphicsPixmapItem,
                            QStatusBar, QMenuBar, QMenu, QToolButton, QButtonGroup,
                            QRadioButton, QDoubleSpinBox, QFrame, QProgressBar, QToolTip)
-from PyQt5.QtCore import Qt, QPointF, pyqtSignal, QRectF, QTimer
+from PyQt5.QtCore import Qt, QPointF, pyqtSignal, QRectF, QTimer, QSize
 from PyQt5.QtGui import QPixmap, QPainter, QColor, QBrush, QPen, QIcon, QImage
 
 class Canvas(QGraphicsView):
@@ -836,7 +836,7 @@ class MainWindow(QMainWindow):
         
     def create_toolbar(self):
         toolbar = QToolBar("Main Toolbar")
-        toolbar.setIconSize(Qt.QSize(24, 24))
+        toolbar.setIconSize(QSize(24, 24))
         self.addToolBar(toolbar)
         
         # Add toolbar actions
