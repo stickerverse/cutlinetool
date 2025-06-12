@@ -176,7 +176,8 @@ class ToolPanel(QWidget):
         layout.addWidget(export_group)
         
         self.setLayout(layout)
-        self.setMaximumWidth(300)
+        self.setMaximumWidth(320)
+        self.setStyleSheet("QWidget { margin: 10px; }")
 
 class PropertiesPanel(QWidget):
     """Right side properties panel for fine-tuning"""
@@ -240,7 +241,8 @@ class PropertiesPanel(QWidget):
         layout.addWidget(advanced_group)
         
         self.setLayout(layout)
-        self.setMaximumWidth(250)
+        self.setMaximumWidth(270)
+        self.setStyleSheet("QWidget { margin: 10px; }")
 
 class MainWindow(QMainWindow):
     """Main application window"""
@@ -268,11 +270,12 @@ class MainWindow(QMainWindow):
                 font-weight: bold;
                 font-size: 14px;
                 color: #2d3748;
-                border: 2px solid #e2e8f0;
-                border-radius: 8px;
-                margin-top: 15px;
-                padding-top: 15px;
+                border: 1px solid #e2e8f0;
+                border-radius: 10px;
+                margin-top: 20px;
+                padding-top: 20px;
                 background-color: #ffffff;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
             }
             QGroupBox::title {
                 subcontrol-origin: margin;
@@ -284,25 +287,32 @@ class MainWindow(QMainWindow):
             
             /* Button Styling */
             QPushButton {
-                padding: 10px 16px;
-                border-radius: 6px;
+                padding: 12px 20px;
+                border-radius: 8px;
                 border: 1px solid #e2e8f0;
                 background-color: #ffffff;
                 color: #2d3748;
                 font-weight: 500;
-                font-size: 12px;
+                font-size: 13px;
+                min-height: 16px;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
             }
             QPushButton:hover {
                 background-color: #f7fafc;
                 border-color: #cbd5e0;
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+                transform: translateY(-1px);
             }
             QPushButton:pressed {
                 background-color: #edf2f7;
+                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+                transform: translateY(0px);
             }
             QPushButton:disabled {
                 background-color: #f7fafc;
                 color: #a0aec0;
                 border-color: #e2e8f0;
+                box-shadow: none;
             }
             
             /* Primary Action Buttons */
@@ -310,13 +320,19 @@ class MainWindow(QMainWindow):
                 background-color: #667eea;
                 color: white;
                 border: 1px solid #667eea;
+                font-weight: 600;
+                box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
             }
             QPushButton[class="primary"]:hover {
                 background-color: #5a67d8;
                 border-color: #5a67d8;
+                box-shadow: 0 4px 8px rgba(102, 126, 234, 0.4);
+                transform: translateY(-2px);
             }
             QPushButton[class="primary"]:pressed {
                 background-color: #4c51bf;
+                box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+                transform: translateY(0px);
             }
             
             /* Success Action Buttons */
@@ -324,51 +340,69 @@ class MainWindow(QMainWindow):
                 background-color: #48bb78;
                 color: white;
                 border: 1px solid #48bb78;
+                font-weight: 600;
+                box-shadow: 0 2px 4px rgba(72, 187, 120, 0.3);
             }
             QPushButton[class="success"]:hover {
                 background-color: #38a169;
                 border-color: #38a169;
+                box-shadow: 0 4px 8px rgba(72, 187, 120, 0.4);
+                transform: translateY(-2px);
             }
             QPushButton[class="success"]:pressed {
                 background-color: #2f855a;
+                box-shadow: 0 2px 4px rgba(72, 187, 120, 0.3);
+                transform: translateY(0px);
             }
             
             /* Form Controls */
             QComboBox, QSpinBox, QDoubleSpinBox {
-                padding: 6px 10px;
+                padding: 8px 12px;
                 border: 1px solid #e2e8f0;
-                border-radius: 4px;
+                border-radius: 6px;
                 background-color: #ffffff;
                 color: #2d3748;
-                font-size: 12px;
+                font-size: 13px;
+                min-height: 20px;
+                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
             }
             QComboBox:hover, QSpinBox:hover, QDoubleSpinBox:hover {
                 border-color: #cbd5e0;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             }
             QComboBox:focus, QSpinBox:focus, QDoubleSpinBox:focus {
                 border-color: #667eea;
                 outline: none;
+                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
             }
             
             /* Checkbox Styling */
             QCheckBox {
                 color: #2d3748;
-                font-size: 12px;
-                spacing: 8px;
+                font-size: 13px;
+                spacing: 10px;
+                font-weight: 500;
             }
             QCheckBox::indicator {
-                width: 16px;
-                height: 16px;
-                border-radius: 3px;
-                border: 1px solid #e2e8f0;
+                width: 18px;
+                height: 18px;
+                border-radius: 4px;
+                border: 2px solid #e2e8f0;
                 background-color: #ffffff;
+                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
             }
             QCheckBox::indicator:hover {
                 border-color: #cbd5e0;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             }
             QCheckBox::indicator:checked {
                 background-color: #667eea;
                 border-color: #667eea;
+                box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+            }
+            QCheckBox::indicator:checked:hover {
+                background-color: #5a67d8;
+                border-color: #5a67d8;
             }
             
             /* Label Styling */
@@ -409,22 +443,27 @@ class MainWindow(QMainWindow):
             /* List Widget */
             QListWidget {
                 border: 1px solid #e2e8f0;
-                border-radius: 4px;
+                border-radius: 8px;
                 background-color: #ffffff;
                 color: #2d3748;
-                font-size: 12px;
-                padding: 4px;
+                font-size: 13px;
+                padding: 6px;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
             }
             QListWidget::item {
-                padding: 4px 8px;
-                border-radius: 3px;
+                padding: 8px 12px;
+                border-radius: 6px;
+                margin: 2px;
+                font-weight: 500;
             }
             QListWidget::item:hover {
                 background-color: #f7fafc;
+                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
             }
             QListWidget::item:selected {
                 background-color: #667eea;
                 color: white;
+                box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
             }
             
             /* Toolbar Styling */
