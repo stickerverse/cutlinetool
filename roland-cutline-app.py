@@ -623,14 +623,25 @@ class MainWindow(QMainWindow):
         # Properties panel (right)
         self.properties_panel = PropertiesPanel()
         
-        # Create splitter for resizable panels
         splitter = QSplitter(Qt.Horizontal)
         splitter.addWidget(self.tool_panel)
         splitter.addWidget(self.canvas)
         splitter.addWidget(self.properties_panel)
         
-        # Set initial splitter sizes
-        splitter.setSizes([300, 800, 300])
+        # Set initial splitter sizes with enhanced proportions
+        splitter.setSizes([340, 800, 290])
+        
+        splitter.setCollapsible(0, False)  # Tool panel cannot be collapsed
+        splitter.setCollapsible(1, False)  # Canvas cannot be collapsed
+        splitter.setCollapsible(2, False)  # Properties panel cannot be collapsed
+        
+        self.tool_panel.setMinimumWidth(280)
+        self.canvas.setMinimumSize(400, 300)  # Minimum canvas size
+        self.properties_panel.setMinimumWidth(220)
+        
+        self.main_splitter = splitter
+        
+        splitter.splitterMoved.connect(self.on_splitter_moved)
         
         main_layout.addWidget(splitter)
         central_widget.setLayout(main_layout)
@@ -664,11 +675,29 @@ class MainWindow(QMainWindow):
         edit_menu.addSeparator()
         edit_menu.addAction("Preferences")
         
-        # View menu
+        # View menu with enhanced canvas controls
         view_menu = menubar.addMenu("View")
-        view_menu.addAction("Zoom In")
-        view_menu.addAction("Zoom Out")
-        view_menu.addAction("Fit to Window")
+        
+        zoom_in_menu = QAction("Zoom In", self)
+        zoom_in_menu.setShortcut("Ctrl++")
+        zoom_in_menu.triggered.connect(self.zoom_in)
+        view_menu.addAction(zoom_in_menu)
+        
+        zoom_out_menu = QAction("Zoom Out", self)
+        zoom_out_menu.setShortcut("Ctrl+-")
+        zoom_out_menu.triggered.connect(self.zoom_out)
+        view_menu.addAction(zoom_out_menu)
+        
+        fit_menu = QAction("Fit to Window", self)
+        fit_menu.setShortcut("Ctrl+0")
+        fit_menu.triggered.connect(self.fit_to_window)
+        view_menu.addAction(fit_menu)
+        
+        actual_size_menu = QAction("Actual Size", self)
+        actual_size_menu.setShortcut("Ctrl+1")
+        actual_size_menu.triggered.connect(self.actual_size)
+        view_menu.addAction(actual_size_menu)
+        
         view_menu.addSeparator()
         view_menu.addAction("Show Cut Lines")
         view_menu.addAction("Show Original")
@@ -698,15 +727,26 @@ class MainWindow(QMainWindow):
         
         toolbar.addSeparator()
         
-        # View tools
+        # View tools with enhanced canvas scaling
         zoom_in_action = QAction("Zoom In", self)
+        zoom_in_action.setShortcut("Ctrl++")
+        zoom_in_action.triggered.connect(self.zoom_in)
         toolbar.addAction(zoom_in_action)
         
         zoom_out_action = QAction("Zoom Out", self)
+        zoom_out_action.setShortcut("Ctrl+-")
+        zoom_out_action.triggered.connect(self.zoom_out)
         toolbar.addAction(zoom_out_action)
         
         fit_action = QAction("Fit to Window", self)
+        fit_action.setShortcut("Ctrl+0")
+        fit_action.triggered.connect(self.fit_to_window)
         toolbar.addAction(fit_action)
+        
+        actual_size_action = QAction("Actual Size", self)
+        actual_size_action.setShortcut("Ctrl+1")
+        actual_size_action.triggered.connect(self.actual_size)
+        toolbar.addAction(actual_size_action)
         
         toolbar.addSeparator()
         
@@ -748,6 +788,69 @@ class MainWindow(QMainWindow):
             
             # Update properties panel
             self.update_image_properties(file_path)
+    
+    def on_splitter_moved(self):
+        """Handle splitter movement for responsive canvas behavior"""
+        if hasattr(self.canvas, 'pixmap_item') and self.canvas.pixmap_item:
+            current_size = self.canvas.size()
+            if not hasattr(self, '_last_canvas_size'):
+                self._last_canvas_size = current_size
+                return
+            
+            size_change = abs(current_size.width() - self._last_canvas_size.width()) / max(self._last_canvas_size.width(), 1)
+            if size_change > 0.2:  # 20% change threshold
+                self.fit_to_window()
+                self._last_canvas_size = current_size
+    
+    def fit_to_window(self):
+        """Fit image to window size"""
+        if hasattr(self.canvas, 'pixmap_item') and self.canvas.pixmap_item:
+            self.canvas.fitInView(self.canvas.pixmap_item, Qt.KeepAspectRatio)
+            self.update_zoom_status()
+    
+    def update_zoom_status(self):
+        """Update zoom level in status bar"""
+        if hasattr(self.canvas, 'transform'):
+            transform = self.canvas.transform()
+            zoom_level = transform.m11() * 100  # Get scale factor as percentage
+            self.zoom_label.setText(f"Zoom: {zoom_level:.0f}%")
+    
+    def zoom_in(self):
+        """Zoom in on the canvas"""
+        if hasattr(self.canvas, 'scale'):
+            self.canvas.scale(1.25, 1.25)
+            self.update_zoom_status()
+    
+    def zoom_out(self):
+        """Zoom out on the canvas"""
+        if hasattr(self.canvas, 'scale'):
+            self.canvas.scale(0.8, 0.8)
+            self.update_zoom_status()
+    
+    def actual_size(self):
+        """Show image at actual size"""
+        if hasattr(self.canvas, 'resetTransform'):
+            self.canvas.resetTransform()
+            self.update_zoom_status()
+    
+    def resizeEvent(self, event):
+        """Handle window resize events with responsive panel behavior"""
+        super().resizeEvent(event)
+        
+        window_width = event.size().width()
+        
+        if window_width < 1200:  # Compact mode
+            self.tool_panel.setMaximumWidth(300)
+            self.properties_panel.setMaximumWidth(250)
+        elif window_width < 1600:  # Standard mode
+            self.tool_panel.setMaximumWidth(340)
+            self.properties_panel.setMaximumWidth(290)
+        else:  # Expanded mode
+            self.tool_panel.setMaximumWidth(380)
+            self.properties_panel.setMaximumWidth(320)
+        
+        if hasattr(self, 'canvas') and hasattr(self.canvas, 'pixmap_item') and self.canvas.pixmap_item:
+            QTimer.singleShot(100, self.fit_to_window)  # Delay to ensure layout is updated
     
     def update_image_properties(self, file_path):
         # This would be connected to actual image analysis
