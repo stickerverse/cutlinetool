@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                            QSpinBox, QCheckBox, QTabWidget, QListWidget, QDockWidget,
                            QGraphicsScene, QGraphicsView, QGraphicsPixmapItem,
                            QStatusBar, QMenuBar, QMenu, QToolButton, QButtonGroup,
-                           QRadioButton, QDoubleSpinBox, QFrame)
+                           QRadioButton, QDoubleSpinBox, QFrame, QProgressBar, QToolTip)
 from PyQt5.QtCore import Qt, QPointF, pyqtSignal, QRectF, QTimer
 from PyQt5.QtGui import QPixmap, QPainter, QColor, QBrush, QPen, QIcon, QImage
 
@@ -90,15 +90,38 @@ class ToolPanel(QWidget):
         ai_layout.addWidget(upscale_label)
         
         self.upscale_checkbox = QCheckBox("Enable Upscaling")
+        self.upscale_checkbox.setToolTip("Enable AI-powered image upscaling to enhance resolution")
         ai_layout.addWidget(self.upscale_checkbox)
         
         self.upscale_factor = QComboBox()
         self.upscale_factor.addItems(["2x", "3x", "4x"])
         self.upscale_factor.setCurrentIndex(2)  # Default to 4x
+        self.upscale_factor.setToolTip("Select upscaling factor - higher values provide better quality but take longer")
         ai_layout.addWidget(self.upscale_factor)
+        
+        self.upscale_progress = QProgressBar()
+        self.upscale_progress.setVisible(False)
+        self.upscale_progress.setStyleSheet("""
+            QProgressBar {
+                border: 1px solid #e2e8f0;
+                border-radius: 6px;
+                background-color: #f7fafc;
+                text-align: center;
+                font-size: 11px;
+                color: #2d3748;
+                height: 20px;
+            }
+            QProgressBar::chunk {
+                background-color: #667eea;
+                border-radius: 5px;
+                margin: 1px;
+            }
+        """)
+        ai_layout.addWidget(self.upscale_progress)
         
         self.compare_btn = QPushButton("Compare Before/After")
         self.compare_btn.setEnabled(False)
+        self.compare_btn.setToolTip("Compare original and upscaled images side by side")
         ai_layout.addWidget(self.compare_btn)
         
         ai_layout.addSpacing(10)
@@ -110,14 +133,37 @@ class ToolPanel(QWidget):
         
         self.bg_model = QComboBox()
         self.bg_model.addItems(["U2-Net (Best Quality)", "U2-NetP (Faster)", "MODNet (Real-time)"])
+        self.bg_model.setToolTip("Choose AI model: U2-Net for best quality, U2-NetP for balance, MODNet for speed")
         ai_layout.addWidget(self.bg_model)
         
         self.alpha_matting = QCheckBox("Enable Alpha Matting")
         self.alpha_matting.setChecked(True)
+        self.alpha_matting.setToolTip("Enable alpha matting for smoother edge transitions and better quality")
         ai_layout.addWidget(self.alpha_matting)
         
         self.remove_bg_btn = QPushButton("Remove Background")
+        self.remove_bg_btn.setToolTip("Remove image background using selected AI model")
         ai_layout.addWidget(self.remove_bg_btn)
+        
+        self.bg_progress = QProgressBar()
+        self.bg_progress.setVisible(False)
+        self.bg_progress.setStyleSheet("""
+            QProgressBar {
+                border: 1px solid #e2e8f0;
+                border-radius: 6px;
+                background-color: #f7fafc;
+                text-align: center;
+                font-size: 11px;
+                color: #2d3748;
+                height: 20px;
+            }
+            QProgressBar::chunk {
+                background-color: #667eea;
+                border-radius: 5px;
+                margin: 1px;
+            }
+        """)
+        ai_layout.addWidget(self.bg_progress)
         
         ai_group.setLayout(ai_layout)
         layout.addWidget(ai_group)
@@ -134,18 +180,41 @@ class ToolPanel(QWidget):
         self.offset_spinbox.setValue(0.06)
         self.offset_spinbox.setSingleStep(0.01)
         self.offset_spinbox.setSuffix(" in")
+        self.offset_spinbox.setToolTip("Distance between image edge and cut line (0.06 inches recommended)")
         offset_layout.addWidget(self.offset_spinbox)
         cut_layout.addLayout(offset_layout)
         
         # Cut type selection
         self.cut_type = QComboBox()
         self.cut_type.addItems(["CutContour", "PerfCutContour"])
+        self.cut_type.setToolTip("CutContour: Solid cut lines | PerfCutContour: Perforated cut lines for easy removal")
         cut_layout.addWidget(self.cut_type)
         
         # Generate button
         self.generate_cut_btn = QPushButton("Generate Cut Lines")
         self.generate_cut_btn.setProperty("class", "primary")
+        self.generate_cut_btn.setToolTip("Generate precise cut lines for Roland cutting equipment")
         cut_layout.addWidget(self.generate_cut_btn)
+        
+        self.cutline_progress = QProgressBar()
+        self.cutline_progress.setVisible(False)
+        self.cutline_progress.setStyleSheet("""
+            QProgressBar {
+                border: 1px solid #e2e8f0;
+                border-radius: 6px;
+                background-color: #f7fafc;
+                text-align: center;
+                font-size: 11px;
+                color: #2d3748;
+                height: 20px;
+            }
+            QProgressBar::chunk {
+                background-color: #667eea;
+                border-radius: 5px;
+                margin: 1px;
+            }
+        """)
+        cut_layout.addWidget(self.cutline_progress)
         
         cut_group.setLayout(cut_layout)
         layout.addWidget(cut_group)
@@ -155,9 +224,31 @@ class ToolPanel(QWidget):
         object_layout = QVBoxLayout()
         
         self.detect_objects_btn = QPushButton("Detect Multiple Objects")
+        self.detect_objects_btn.setToolTip("Automatically detect and identify multiple objects in the image")
         object_layout.addWidget(self.detect_objects_btn)
         
+        self.object_progress = QProgressBar()
+        self.object_progress.setVisible(False)
+        self.object_progress.setStyleSheet("""
+            QProgressBar {
+                border: 1px solid #e2e8f0;
+                border-radius: 6px;
+                background-color: #f7fafc;
+                text-align: center;
+                font-size: 11px;
+                color: #2d3748;
+                height: 20px;
+            }
+            QProgressBar::chunk {
+                background-color: #667eea;
+                border-radius: 5px;
+                margin: 1px;
+            }
+        """)
+        object_layout.addWidget(self.object_progress)
+        
         self.object_list = QListWidget()
+        self.object_list.setToolTip("List of detected objects - click to select and process individually")
         self.object_list.setMaximumHeight(100)
         object_layout.addWidget(self.object_list)
         
@@ -170,7 +261,28 @@ class ToolPanel(QWidget):
         
         self.export_pdf_btn = QPushButton("Export PDF with Cut Lines")
         self.export_pdf_btn.setProperty("class", "success")
+        self.export_pdf_btn.setToolTip("Export the processed image with cut lines as a PDF file")
         export_layout.addWidget(self.export_pdf_btn)
+        
+        self.export_progress = QProgressBar()
+        self.export_progress.setVisible(False)
+        self.export_progress.setStyleSheet("""
+            QProgressBar {
+                border: 1px solid #e2e8f0;
+                border-radius: 6px;
+                background-color: #f7fafc;
+                text-align: center;
+                font-size: 11px;
+                color: #2d3748;
+                height: 20px;
+            }
+            QProgressBar::chunk {
+                background-color: #48bb78;
+                border-radius: 5px;
+                margin: 1px;
+            }
+        """)
+        export_layout.addWidget(self.export_progress)
         
         export_group.setLayout(export_layout)
         layout.addWidget(export_group)
@@ -207,8 +319,11 @@ class PropertiesPanel(QWidget):
         img_layout = QVBoxLayout()
         
         self.dimensions_label = QLabel("Dimensions: -")
+        self.dimensions_label.setToolTip("Image width and height in pixels")
         self.resolution_label = QLabel("Resolution: -")
+        self.resolution_label.setToolTip("Image resolution in DPI (dots per inch)")
         self.colorspace_label = QLabel("Color Space: -")
+        self.colorspace_label.setToolTip("Image color space (RGB, CMYK, etc.)")
         
         img_layout.addWidget(self.dimensions_label)
         img_layout.addWidget(self.resolution_label)
@@ -222,8 +337,11 @@ class PropertiesPanel(QWidget):
         status_layout = QVBoxLayout()
         
         self.upscale_status = QLabel("Upscaling: Not applied")
+        self.upscale_status.setToolTip("Current upscaling status and applied factor")
         self.bg_status = QLabel("Background: Original")
+        self.bg_status.setToolTip("Background removal status and applied model")
         self.cutline_status = QLabel("Cut Lines: Not generated")
+        self.cutline_status.setToolTip("Cut line generation status and parameters")
         
         status_layout.addWidget(self.upscale_status)
         status_layout.addWidget(self.bg_status)
@@ -240,7 +358,9 @@ class PropertiesPanel(QWidget):
         self.edge_threshold = QSlider(Qt.Horizontal)
         self.edge_threshold.setRange(0, 100)
         self.edge_threshold.setValue(50)
+        self.edge_threshold.setToolTip("Adjust edge detection sensitivity - lower values detect more edges")
         self.edge_label = QLabel("Edge Sensitivity: 50")
+        self.edge_label.setToolTip("Current edge detection sensitivity setting")
         
         advanced_layout.addWidget(self.edge_label)
         advanced_layout.addWidget(self.edge_threshold)
@@ -605,6 +725,8 @@ class MainWindow(QMainWindow):
         self.create_toolbar()
         self.create_statusbar()
         
+        self.connect_processing_buttons()
+        
     def init_ui(self):
         # Create central widget with main layout
         central_widget = QWidget()
@@ -767,12 +889,25 @@ class MainWindow(QMainWindow):
         
         # Add permanent widgets to status bar
         self.coords_label = QLabel("X: 0, Y: 0")
-        self.zoom_label = QLabel("Zoom: 100%")
+        self.coords_label.setToolTip("Current mouse coordinates on canvas")
         
+        self.zoom_label = QLabel("Zoom: 100%")
+        self.zoom_label.setToolTip("Current canvas zoom level")
+        
+        # Processing status indicator
+        self.processing_label = QLabel("")
+        self.processing_label.setStyleSheet("color: #667eea; font-weight: bold;")
+        
+        self.memory_label = QLabel("Memory: 0 MB")
+        self.memory_label.setToolTip("Current memory usage")
+        self.memory_label.setStyleSheet("color: #4a5568; font-size: 11px;")
+        
+        self.statusbar.addWidget(self.processing_label)
+        self.statusbar.addPermanentWidget(self.memory_label)
         self.statusbar.addPermanentWidget(self.coords_label)
         self.statusbar.addPermanentWidget(self.zoom_label)
         
-        self.statusbar.showMessage("Ready")
+        self.statusbar.showMessage("Ready - Load an image to begin processing")
         
     def open_file(self):
         file_path, _ = QFileDialog.getOpenFileName(
@@ -783,11 +918,37 @@ class MainWindow(QMainWindow):
         )
         
         if file_path:
+            self.processing_label.setText("Loading image...")
+            self.statusbar.showMessage("Loading image, please wait...")
+            
+            QTimer.singleShot(100, lambda: self._load_image_delayed(file_path))
+    
+    def _load_image_delayed(self, file_path):
+        """Load image with progress feedback"""
+        try:
             self.canvas.load_image(file_path)
-            self.statusbar.showMessage(f"Loaded: {os.path.basename(file_path)}")
+            
+            self.processing_label.setText("")
+            self.statusbar.showMessage(f"✓ Loaded: {os.path.basename(file_path)} - Ready for processing")
             
             # Update properties panel
             self.update_image_properties(file_path)
+            
+            file_size = os.path.getsize(file_path) / (1024 * 1024)  # MB
+            self.memory_label.setText(f"Memory: {file_size:.1f} MB")
+            
+        except Exception as e:
+            self.processing_label.setText("")
+            self.statusbar.showMessage(f"✗ Error loading file: {str(e)}")
+            self.show_error_tooltip(f"Failed to load image: {str(e)}")
+    
+    def show_error_tooltip(self, message):
+        """Show error message as tooltip"""
+        QToolTip.showText(self.mapToGlobal(self.rect().center()), message)
+    
+    def show_success_tooltip(self, message):
+        """Show success message as tooltip"""
+        QToolTip.showText(self.mapToGlobal(self.rect().center()), message)
     
     def on_splitter_moved(self):
         """Handle splitter movement for responsive canvas behavior"""
@@ -857,6 +1018,157 @@ class MainWindow(QMainWindow):
         self.properties_panel.dimensions_label.setText("Dimensions: 1920 x 1080")
         self.properties_panel.resolution_label.setText("Resolution: 300 DPI")
         self.properties_panel.colorspace_label.setText("Color Space: RGB")
+    
+    def simulate_upscaling(self):
+        """Simulate upscaling process with progress feedback"""
+        self.tool_panel.upscale_progress.setVisible(True)
+        self.tool_panel.upscale_progress.setValue(0)
+        self.processing_label.setText("Upscaling image...")
+        self.statusbar.showMessage("Upscaling in progress...")
+        
+        self.upscale_timer = QTimer()
+        self.upscale_progress_value = 0
+        self.upscale_timer.timeout.connect(self.update_upscale_progress)
+        self.upscale_timer.start(100)  # Update every 100ms
+    
+    def update_upscale_progress(self):
+        """Update upscaling progress"""
+        self.upscale_progress_value += 2
+        self.tool_panel.upscale_progress.setValue(self.upscale_progress_value)
+        
+        if self.upscale_progress_value >= 100:
+            self.upscale_timer.stop()
+            self.tool_panel.upscale_progress.setVisible(False)
+            self.processing_label.setText("")
+            self.statusbar.showMessage("✓ Upscaling completed successfully")
+            self.show_success_tooltip("Image upscaling completed!")
+            
+            # Update properties panel
+            factor = self.tool_panel.upscale_factor.currentText()
+            self.properties_panel.upscale_status.setText(f"Upscaling: Applied {factor}")
+    
+    def simulate_background_removal(self):
+        """Simulate background removal process with progress feedback"""
+        self.tool_panel.bg_progress.setVisible(True)
+        self.tool_panel.bg_progress.setValue(0)
+        self.processing_label.setText("Removing background...")
+        self.statusbar.showMessage("Background removal in progress...")
+        
+        self.bg_timer = QTimer()
+        self.bg_progress_value = 0
+        self.bg_timer.timeout.connect(self.update_bg_progress)
+        self.bg_timer.start(150)  # Update every 150ms
+    
+    def update_bg_progress(self):
+        """Update background removal progress"""
+        self.bg_progress_value += 3
+        self.tool_panel.bg_progress.setValue(self.bg_progress_value)
+        
+        if self.bg_progress_value >= 100:
+            self.bg_timer.stop()
+            self.tool_panel.bg_progress.setVisible(False)
+            self.processing_label.setText("")
+            self.statusbar.showMessage("✓ Background removal completed successfully")
+            self.show_success_tooltip("Background removed successfully!")
+            
+            # Update properties panel
+            model = self.tool_panel.bg_model.currentText()
+            self.properties_panel.bg_status.setText(f"Background: Removed ({model})")
+    
+    def simulate_cutline_generation(self):
+        """Simulate cut line generation process with progress feedback"""
+        self.tool_panel.cutline_progress.setVisible(True)
+        self.tool_panel.cutline_progress.setValue(0)
+        self.processing_label.setText("Generating cut lines...")
+        self.statusbar.showMessage("Cut line generation in progress...")
+        
+        self.cutline_timer = QTimer()
+        self.cutline_progress_value = 0
+        self.cutline_timer.timeout.connect(self.update_cutline_progress)
+        self.cutline_timer.start(80)  # Update every 80ms
+    
+    def update_cutline_progress(self):
+        """Update cut line generation progress"""
+        self.cutline_progress_value += 4
+        self.tool_panel.cutline_progress.setValue(self.cutline_progress_value)
+        
+        if self.cutline_progress_value >= 100:
+            self.cutline_timer.stop()
+            self.tool_panel.cutline_progress.setVisible(False)
+            self.processing_label.setText("")
+            self.statusbar.showMessage("✓ Cut lines generated successfully")
+            self.show_success_tooltip("Cut lines generated successfully!")
+            
+            # Update properties panel
+            cut_type = self.tool_panel.cut_type.currentText()
+            offset = self.tool_panel.offset_spinbox.value()
+            self.properties_panel.cutline_status.setText(f"Cut Lines: Generated ({cut_type}, {offset}in offset)")
+    
+    def simulate_object_detection(self):
+        """Simulate object detection process with progress feedback"""
+        self.tool_panel.object_progress.setVisible(True)
+        self.tool_panel.object_progress.setValue(0)
+        self.processing_label.setText("Detecting objects...")
+        self.statusbar.showMessage("Object detection in progress...")
+        
+        self.object_timer = QTimer()
+        self.object_progress_value = 0
+        self.object_timer.timeout.connect(self.update_object_progress)
+        self.object_timer.start(120)  # Update every 120ms
+    
+    def update_object_progress(self):
+        """Update object detection progress"""
+        self.object_progress_value += 5
+        self.tool_panel.object_progress.setValue(self.object_progress_value)
+        
+        if self.object_progress_value >= 100:
+            self.object_timer.stop()
+            self.tool_panel.object_progress.setVisible(False)
+            self.processing_label.setText("")
+            self.statusbar.showMessage("✓ Object detection completed successfully")
+            self.show_success_tooltip("Objects detected successfully!")
+            
+            self.tool_panel.object_list.clear()
+            self.tool_panel.object_list.addItems(["Object 1: Logo", "Object 2: Text", "Object 3: Shape"])
+    
+    def simulate_export(self):
+        """Simulate export process with progress feedback"""
+        self.tool_panel.export_progress.setVisible(True)
+        self.tool_panel.export_progress.setValue(0)
+        self.processing_label.setText("Exporting PDF...")
+        self.statusbar.showMessage("PDF export in progress...")
+        
+        self.export_timer = QTimer()
+        self.export_progress_value = 0
+        self.export_timer.timeout.connect(self.update_export_progress)
+        self.export_timer.start(90)  # Update every 90ms
+    
+    def update_export_progress(self):
+        """Update export progress"""
+        self.export_progress_value += 3
+        self.tool_panel.export_progress.setValue(self.export_progress_value)
+        
+        if self.export_progress_value >= 100:
+            self.export_timer.stop()
+            self.tool_panel.export_progress.setVisible(False)
+            self.processing_label.setText("")
+            self.statusbar.showMessage("✓ PDF exported successfully")
+            self.show_success_tooltip("PDF exported successfully!")
+    
+    def connect_processing_buttons(self):
+        """Connect processing buttons to simulated operations"""
+        if hasattr(self.tool_panel, 'upscale_checkbox'):
+            self.tool_panel.upscale_checkbox.stateChanged.connect(
+                lambda: self.simulate_upscaling() if self.tool_panel.upscale_checkbox.isChecked() else None
+            )
+        
+        self.tool_panel.remove_bg_btn.clicked.connect(self.simulate_background_removal)
+        
+        self.tool_panel.generate_cut_btn.clicked.connect(self.simulate_cutline_generation)
+        
+        self.tool_panel.detect_objects_btn.clicked.connect(self.simulate_object_detection)
+        
+        self.tool_panel.export_pdf_btn.clicked.connect(self.simulate_export)
 
 def main():
     app = QApplication(sys.argv)
