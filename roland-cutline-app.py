@@ -176,8 +176,20 @@ class ToolPanel(QWidget):
         layout.addWidget(export_group)
         
         self.setLayout(layout)
-        self.setMaximumWidth(320)
-        self.setStyleSheet("QWidget { margin: 10px; }")
+        self.setMaximumWidth(340)
+        self.setStyleSheet("""
+            QWidget { 
+                margin: 12px; 
+                background-color: #f8fafc;
+            }
+            QWidget[class="panel"] {
+                background-color: #ffffff;
+                border-radius: 12px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+                padding: 16px;
+                margin: 8px;
+            }
+        """)
 
 class PropertiesPanel(QWidget):
     """Right side properties panel for fine-tuning"""
@@ -241,8 +253,20 @@ class PropertiesPanel(QWidget):
         layout.addWidget(advanced_group)
         
         self.setLayout(layout)
-        self.setMaximumWidth(270)
-        self.setStyleSheet("QWidget { margin: 10px; }")
+        self.setMaximumWidth(290)
+        self.setStyleSheet("""
+            QWidget { 
+                margin: 12px; 
+                background-color: #f8fafc;
+            }
+            QWidget[class="panel"] {
+                background-color: #ffffff;
+                border-radius: 12px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+                padding: 16px;
+                margin: 8px;
+            }
+        """)
 
 class MainWindow(QMainWindow):
     """Main application window"""
@@ -255,14 +279,30 @@ class MainWindow(QMainWindow):
         # Set application style with enhanced modern theme
         self.setStyleSheet("""
             QMainWindow {
-                background-color: #f8f9fa;
+                background-color: #f1f5f9;
                 color: #2d3748;
+                border: none;
             }
             
             /* Panel Styling */
             QWidget {
-                background-color: #f8f9fa;
+                background-color: #f1f5f9;
                 color: #2d3748;
+            }
+            
+            /* Main Content Area Styling */
+            QSplitter {
+                background-color: #f1f5f9;
+                border: none;
+            }
+            QSplitter::handle {
+                background-color: #e2e8f0;
+                border: 1px solid #cbd5e0;
+                border-radius: 2px;
+                margin: 2px;
+            }
+            QSplitter::handle:hover {
+                background-color: #cbd5e0;
             }
             
             /* Group Box Styling */
@@ -271,18 +311,25 @@ class MainWindow(QMainWindow):
                 font-size: 14px;
                 color: #2d3748;
                 border: 1px solid #e2e8f0;
-                border-radius: 10px;
-                margin-top: 20px;
-                padding-top: 20px;
+                border-radius: 12px;
+                margin: 8px;
+                margin-top: 24px;
+                padding-top: 24px;
+                padding-left: 16px;
+                padding-right: 16px;
+                padding-bottom: 16px;
                 background-color: #ffffff;
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.06);
             }
             QGroupBox::title {
                 subcontrol-origin: margin;
-                left: 15px;
-                padding: 0 8px 0 8px;
+                left: 20px;
+                padding: 4px 12px 4px 12px;
                 background-color: #ffffff;
                 color: #2d3748;
+                border: 1px solid #e2e8f0;
+                border-radius: 6px;
+                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
             }
             
             /* Button Styling */
@@ -471,20 +518,27 @@ class MainWindow(QMainWindow):
                 background-color: #ffffff;
                 border: none;
                 border-bottom: 1px solid #e2e8f0;
-                padding: 4px;
+                padding: 8px 12px;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                spacing: 4px;
             }
             QToolBar QToolButton {
-                padding: 6px;
-                border-radius: 4px;
-                border: none;
+                padding: 8px 12px;
+                border-radius: 6px;
+                border: 1px solid transparent;
                 background-color: transparent;
                 color: #2d3748;
+                font-weight: 500;
+                margin: 2px;
             }
             QToolBar QToolButton:hover {
                 background-color: #f7fafc;
+                border-color: #e2e8f0;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             }
             QToolBar QToolButton:pressed {
                 background-color: #edf2f7;
+                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
             }
             
             /* Status Bar */
@@ -493,6 +547,8 @@ class MainWindow(QMainWindow):
                 border-top: 1px solid #e2e8f0;
                 color: #4a5568;
                 font-size: 11px;
+                padding: 6px 12px;
+                box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.1);
             }
             
             /* Menu Bar */
@@ -501,16 +557,46 @@ class MainWindow(QMainWindow):
                 border-bottom: 1px solid #e2e8f0;
                 color: #2d3748;
                 font-size: 12px;
+                padding: 4px 8px;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
             }
             QMenuBar::item {
-                padding: 6px 12px;
+                padding: 8px 16px;
                 background-color: transparent;
+                border-radius: 6px;
+                margin: 2px;
+                font-weight: 500;
             }
             QMenuBar::item:hover {
                 background-color: #f7fafc;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             }
             QMenuBar::item:pressed {
                 background-color: #edf2f7;
+                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            }
+            
+            /* Menu Dropdown Styling */
+            QMenu {
+                background-color: #ffffff;
+                border: 1px solid #e2e8f0;
+                border-radius: 8px;
+                padding: 6px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+            }
+            QMenu::item {
+                padding: 8px 16px;
+                border-radius: 6px;
+                color: #2d3748;
+                font-size: 12px;
+            }
+            QMenu::item:hover {
+                background-color: #f7fafc;
+                color: #2d3748;
+            }
+            QMenu::item:selected {
+                background-color: #667eea;
+                color: white;
             }
         """)
         
