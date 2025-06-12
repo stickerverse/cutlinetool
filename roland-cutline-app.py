@@ -30,8 +30,8 @@ class Canvas(QGraphicsView):
         self.show_cut_lines = True
         self.show_original = True
         
-        # Background pattern
-        self.setBackgroundBrush(QBrush(Qt.gray, Qt.Dense6Pattern))
+        # Background pattern - modern checkerboard for transparency
+        self.setBackgroundBrush(QBrush(QColor("#f7fafc"), Qt.Dense6Pattern))
         
     def load_image(self, image_path):
         """Load an image onto the canvas"""
@@ -86,7 +86,7 @@ class ToolPanel(QWidget):
         
         # Upscaling
         upscale_label = QLabel("Image Upscaling")
-        upscale_label.setStyleSheet("font-weight: bold;")
+        upscale_label.setProperty("class", "header")
         ai_layout.addWidget(upscale_label)
         
         self.upscale_checkbox = QCheckBox("Enable Upscaling")
@@ -105,7 +105,7 @@ class ToolPanel(QWidget):
         
         # Background Removal
         bg_label = QLabel("Background Removal")
-        bg_label.setStyleSheet("font-weight: bold;")
+        bg_label.setProperty("class", "header")
         ai_layout.addWidget(bg_label)
         
         self.bg_model = QComboBox()
@@ -144,7 +144,7 @@ class ToolPanel(QWidget):
         
         # Generate button
         self.generate_cut_btn = QPushButton("Generate Cut Lines")
-        self.generate_cut_btn.setStyleSheet("QPushButton { background-color: #667eea; color: white; font-weight: bold; }")
+        self.generate_cut_btn.setProperty("class", "primary")
         cut_layout.addWidget(self.generate_cut_btn)
         
         cut_group.setLayout(cut_layout)
@@ -169,7 +169,7 @@ class ToolPanel(QWidget):
         export_layout = QVBoxLayout()
         
         self.export_pdf_btn = QPushButton("Export PDF with Cut Lines")
-        self.export_pdf_btn.setStyleSheet("QPushButton { background-color: #48bb78; color: white; font-weight: bold; }")
+        self.export_pdf_btn.setProperty("class", "success")
         export_layout.addWidget(self.export_pdf_btn)
         
         export_group.setLayout(export_layout)
@@ -250,31 +250,228 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Roland Cut Line Tool - Professional Edition")
         self.setGeometry(100, 100, 1400, 900)
         
-        # Set application style
+        # Set application style with enhanced modern theme
         self.setStyleSheet("""
             QMainWindow {
-                background-color: #f0f0f0;
+                background-color: #f8f9fa;
+                color: #2d3748;
             }
+            
+            /* Panel Styling */
+            QWidget {
+                background-color: #f8f9fa;
+                color: #2d3748;
+            }
+            
+            /* Group Box Styling */
             QGroupBox {
                 font-weight: bold;
-                border: 2px solid #cccccc;
-                border-radius: 5px;
-                margin-top: 10px;
-                padding-top: 10px;
+                font-size: 14px;
+                color: #2d3748;
+                border: 2px solid #e2e8f0;
+                border-radius: 8px;
+                margin-top: 15px;
+                padding-top: 15px;
+                background-color: #ffffff;
             }
             QGroupBox::title {
                 subcontrol-origin: margin;
-                left: 10px;
-                padding: 0 5px 0 5px;
+                left: 15px;
+                padding: 0 8px 0 8px;
+                background-color: #ffffff;
+                color: #2d3748;
             }
+            
+            /* Button Styling */
             QPushButton {
-                padding: 8px;
-                border-radius: 4px;
-                border: 1px solid #ccc;
-                background-color: white;
+                padding: 10px 16px;
+                border-radius: 6px;
+                border: 1px solid #e2e8f0;
+                background-color: #ffffff;
+                color: #2d3748;
+                font-weight: 500;
+                font-size: 12px;
             }
             QPushButton:hover {
-                background-color: #e0e0e0;
+                background-color: #f7fafc;
+                border-color: #cbd5e0;
+            }
+            QPushButton:pressed {
+                background-color: #edf2f7;
+            }
+            QPushButton:disabled {
+                background-color: #f7fafc;
+                color: #a0aec0;
+                border-color: #e2e8f0;
+            }
+            
+            /* Primary Action Buttons */
+            QPushButton[class="primary"] {
+                background-color: #667eea;
+                color: white;
+                border: 1px solid #667eea;
+            }
+            QPushButton[class="primary"]:hover {
+                background-color: #5a67d8;
+                border-color: #5a67d8;
+            }
+            QPushButton[class="primary"]:pressed {
+                background-color: #4c51bf;
+            }
+            
+            /* Success Action Buttons */
+            QPushButton[class="success"] {
+                background-color: #48bb78;
+                color: white;
+                border: 1px solid #48bb78;
+            }
+            QPushButton[class="success"]:hover {
+                background-color: #38a169;
+                border-color: #38a169;
+            }
+            QPushButton[class="success"]:pressed {
+                background-color: #2f855a;
+            }
+            
+            /* Form Controls */
+            QComboBox, QSpinBox, QDoubleSpinBox {
+                padding: 6px 10px;
+                border: 1px solid #e2e8f0;
+                border-radius: 4px;
+                background-color: #ffffff;
+                color: #2d3748;
+                font-size: 12px;
+            }
+            QComboBox:hover, QSpinBox:hover, QDoubleSpinBox:hover {
+                border-color: #cbd5e0;
+            }
+            QComboBox:focus, QSpinBox:focus, QDoubleSpinBox:focus {
+                border-color: #667eea;
+                outline: none;
+            }
+            
+            /* Checkbox Styling */
+            QCheckBox {
+                color: #2d3748;
+                font-size: 12px;
+                spacing: 8px;
+            }
+            QCheckBox::indicator {
+                width: 16px;
+                height: 16px;
+                border-radius: 3px;
+                border: 1px solid #e2e8f0;
+                background-color: #ffffff;
+            }
+            QCheckBox::indicator:hover {
+                border-color: #cbd5e0;
+            }
+            QCheckBox::indicator:checked {
+                background-color: #667eea;
+                border-color: #667eea;
+            }
+            
+            /* Label Styling */
+            QLabel {
+                color: #2d3748;
+                font-size: 12px;
+            }
+            QLabel[class="header"] {
+                font-weight: bold;
+                font-size: 14px;
+                color: #2d3748;
+            }
+            QLabel[class="secondary"] {
+                color: #4a5568;
+                font-size: 11px;
+            }
+            
+            /* Slider Styling */
+            QSlider::groove:horizontal {
+                border: 1px solid #e2e8f0;
+                height: 4px;
+                background: #edf2f7;
+                border-radius: 2px;
+            }
+            QSlider::handle:horizontal {
+                background: #667eea;
+                border: 1px solid #667eea;
+                width: 16px;
+                height: 16px;
+                border-radius: 8px;
+                margin: -6px 0;
+            }
+            QSlider::handle:horizontal:hover {
+                background: #5a67d8;
+                border-color: #5a67d8;
+            }
+            
+            /* List Widget */
+            QListWidget {
+                border: 1px solid #e2e8f0;
+                border-radius: 4px;
+                background-color: #ffffff;
+                color: #2d3748;
+                font-size: 12px;
+                padding: 4px;
+            }
+            QListWidget::item {
+                padding: 4px 8px;
+                border-radius: 3px;
+            }
+            QListWidget::item:hover {
+                background-color: #f7fafc;
+            }
+            QListWidget::item:selected {
+                background-color: #667eea;
+                color: white;
+            }
+            
+            /* Toolbar Styling */
+            QToolBar {
+                background-color: #ffffff;
+                border: none;
+                border-bottom: 1px solid #e2e8f0;
+                padding: 4px;
+            }
+            QToolBar QToolButton {
+                padding: 6px;
+                border-radius: 4px;
+                border: none;
+                background-color: transparent;
+                color: #2d3748;
+            }
+            QToolBar QToolButton:hover {
+                background-color: #f7fafc;
+            }
+            QToolBar QToolButton:pressed {
+                background-color: #edf2f7;
+            }
+            
+            /* Status Bar */
+            QStatusBar {
+                background-color: #ffffff;
+                border-top: 1px solid #e2e8f0;
+                color: #4a5568;
+                font-size: 11px;
+            }
+            
+            /* Menu Bar */
+            QMenuBar {
+                background-color: #ffffff;
+                border-bottom: 1px solid #e2e8f0;
+                color: #2d3748;
+                font-size: 12px;
+            }
+            QMenuBar::item {
+                padding: 6px 12px;
+                background-color: transparent;
+            }
+            QMenuBar::item:hover {
+                background-color: #f7fafc;
+            }
+            QMenuBar::item:pressed {
+                background-color: #edf2f7;
             }
         """)
         
